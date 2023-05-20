@@ -25,4 +25,55 @@ class M_History extends CI_Model {
 		return $this->db->query("SELECT * FROM pelanggan LEFT JOIN transaksi ON pelanggan.id_pelanggan = transaksi.id_pelanggan;");
 
 	}
+
+	public function get_history($id_pelanggan)
+    {
+        $this->db->select('*');
+        $this->db->from('pelanggan');
+		$this->db->where('pelanggan.id_pelanggan', $id_pelanggan);
+        $this->db->join('transaksi', 'pelanggan.id_pelanggan = transaksi.id_pelanggan', 'left');
+        $query = $this->db->get();
+        return $query->result();
+    }
+
+	public function get_transaksi(){
+
+		// $this->db->where('id_pelanggan', $id_pelanggan);
+        // return $this->db->get('transaksi')->result();
+
+		$this->db->select('transaksi.*, pelanggan.nama_pelanggan, produk.nama_produk');
+        $this->db->from('transaksi');
+        $this->db->join('pelanggan', 'pelanggan.id_pelanggan = transaksi.id_pelanggan');
+        $this->db->join('produk', 'produk.id_produk = transaksi.id_produk');
+        $query = $this->db->get();
+
+        // Mengembalikan hasil query
+        return $query->result();
+
+	}
+
+	public function tambah_transaksi($data) {
+        // Tambahkan data transaksi ke dalam tabel transaksi
+        $this->db->insert('transaksi', $data);
+    }
+
+	public function getTransaksiByPelanggan($id_pelanggan) {
+        $this->db->where('id_pelanggan', $id_pelanggan);
+        $query = $this->db->get('transaksi');
+        return $query->result();
+    }
+
+	public function get_id_pelanggan($id_pelanggan){
+		
+		$this->db->where('id_pelanggan', $id_pelanggan);
+		return $this->db->get('pelanggan')->result();
+		
+		// $this->db->select('id_pelanggan');
+		// $this->db->from('transaksi');
+		// $this->db->where('id_pelanggan', $this->session->userdata('id_pelanggan'));
+		// $query = $this->db->get();
+		// return $query->result();
+
+	}
+
 }

@@ -1,6 +1,7 @@
 <?php
 
 use chriskacerguis\RestServer\RestController;
+require_once APPPATH . 'libraries/REST_Controller.php';
 
 defined('BASEPATH') OR exit('No direct script access allowed');
 
@@ -63,4 +64,12 @@ class History extends RestController {
 		}
 	
 	}
+
+	public function get_history_by_id_pelanggan($id_pelanggan)
+    {
+        // Mengambil data history transaksi berdasarkan id_pelanggan
+        $this->db->where('id_pelanggan', $id_pelanggan);
+        $query = $this->db->get('transaksi');
+        return $query->result();
+    }
 }
