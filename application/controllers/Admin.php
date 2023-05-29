@@ -24,8 +24,9 @@ class Admin extends RestController {
 			$this->response([
 				'status' => true,
 				'message' => 'Login berhasil',
-				'data' => $cek,
-				'token' => $jwt->encode($cek, $jwtsecretkey)
+				'token' => $jwt->encode($cek, $jwtsecretkey),
+				'data' => $cek
+				
 			], restController::HTTP_OK);
 		} else {
 			$this->response([
