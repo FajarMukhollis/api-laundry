@@ -52,22 +52,33 @@ class Product extends RestController {
 		}
 	}
 
-	public function deleteproduct_delete(){
+	//delete
+	public function product_delete(){
 		$id_produk = $this->delete('id_produk');
 
-		$check_data = $this->M_Product->delete_product($id_produk);
-		if($check_data){
-			$this->response([
-				'status' => true,
-				'message' => 'Data berhasil dihapus'
-			], RestController::HTTP_OK);
-		} else {
-			$this->response([
-				'status' => false,
-				'message' => 'Data tidak ditemukan'
-			], RestController::HTTP_NOT_FOUND);
-		}
-
+        if ($id_produk === null) {
+            $this->response([
+                'status' => false,
+                'message' => 'id_produk tidak ditemukan'
+            ], RestController::HTTP_BAD_REQUEST);
+        } else {
+            // Pengecekan apakah produk dengan ID tersebut ada dalam database
+            $produk = $this->M_Product->get_produk_by_id($id_produk);
+            if ($produk) {
+                // Hapus produk
+                $this->M_Product->delete_product($id_produk);
+                $this->response([
+                    'status' => true,
+                    'message' => 'Produk berhasil dihapus'
+                ], RestController::HTTP_OK);
+            } else {
+                $this->response([
+                    'status' => false,
+                    'message' => 'Produk tidak tersedia'
+                ], RestController::HTTP_NOT_FOUND);
+            }
+        }
+		
 	}
 
 	public function product_put(){
