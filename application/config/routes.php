@@ -56,7 +56,7 @@ $route['translate_uri_dashes'] = FALSE;
 // Pelanggan
 $route['login'] = 'user/login';
 $route['transaksi'] = 'user/transaksi';
-$route['history']= 'user/transaksi';
+$route['history'] = 'user/transaksi';
 // $route['transaksi/(:num)'] = 'user/transaksi/$1';
 
 

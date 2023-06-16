@@ -9,5 +9,4 @@ class M_Register extends CI_Model {
 		return $this->db->query("SELECT email FROM pelanggan WHERE email = '$email'");
 
 	}
-
 }

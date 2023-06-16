@@ -42,4 +42,18 @@ class M_Login extends CI_Model {
             return false;
         }
 	}
+
+	public function proses_login_user($email, $password){
+		
+		$this->db->select('*');
+		$this->db->from('pelanggan');
+		$this->db->where('email', $email);
+		$this->db->where('password', MD5($password));
+
+		$query = $this->db->get();
+
+		if($query->num_rows() > 0){
+			return $query->result_array();
+		}
+	}
 }

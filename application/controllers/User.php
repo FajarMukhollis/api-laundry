@@ -35,20 +35,20 @@ class User extends RestController
 			], RestController::HTTP_BAD_REQUEST);
 		}
 
-		$user = $this->M_Login->getUserByEmailAndPassword($email, md5($password));
-		if ($user) {
-			// Jika pengguna ditemukan, tampilkan data pengguna
+		$cek = $this->M_Login->proses_login_user($email, $password);
+		if ($cek) {
 			$this->response([
 				'status' => true,
 				'message' => 'Login berhasil',
-				'token' => $jwt->encode($user, jwtsecretkey),
-				'data' => $user
+				'token' => $jwt->encode($cek, jwtsecretkey),
+				'data' => $cek
 			], restController::HTTP_OK);
+
+			$this->session->set_userdata('id_pelanggan', $id_pelanggan);
 		} else {
-			// Jika pengguna tidak ditemukan
 			$this->response([
 				'status' => false,
-				'message' => 'Login gagal, Password atau Email salah'
+				'message' => 'Login gagal'
 			], restController::HTTP_NOT_FOUND);
 		}
 	}
@@ -78,7 +78,7 @@ class User extends RestController
 				'no_telp' => $notelp,
 				'alamat' => $alamat,
 				'email' => $email,
-				md5('password') => $encrypted_password //bisa encrypt disini
+				'password' => $encrypted_password //bisa encrypt disini
 			];
 			$this->db->insert('pelanggan', $register);
 
@@ -202,4 +202,22 @@ class User extends RestController
 		}
 	}
 
+	// public function history_get()
+	// {
+	// 	$id = $this->M_History->get_id_pelanggan($this->get('id_pelanggan'));
+
+	// 	$data = $this->M_History->get_history($id[0]->id_pelanggan);
+	// 	if ($data) {
+	// 		$this->response([
+	// 			'status' => false,
+	// 			'message' => 'Data tidak ditemukan'
+	// 		], RestController::HTTP_NOT_FOUND);
+	// 	} else {
+	// 		$this->response([
+	// 			'status' => true,
+	// 			'message' => 'Data ditemukan',
+	// 			'data' => $data
+	// 		], RestController::HTTP_OK);
+	// 	}
+	// }
 }
