@@ -56,9 +56,15 @@ $route['translate_uri_dashes'] = FALSE;
 // Pelanggan
 $route['login'] = 'user/login';
 $route['transaksi'] = 'user/transaksi';
+$route['history']= 'user/transaksi';
 // $route['transaksi/(:num)'] = 'user/transaksi/$1';
 
 
 //admin
-// $route['login'] = 'admin/login';
-$route['produk'] = 'admin/produk';
+$route['adminlogin'] = 'admin/login';
+
+//product
+$route['get_product'] = 'product/product';
+$route['edit_product'] = 'product/product';
+$route['delete_product'] = 'product/product';
+$route['add_product'] = 'product/product';

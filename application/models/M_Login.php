@@ -3,36 +3,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class M_Login extends CI_Model {
 
-	//Login
-	public function proses_login_user($email, $password){
-		
-		$this->db->select('*');
-		$this->db->from('pelanggan');
-		$this->db->where('email', $email);
-		$this->db->where('password', MD5($password));
-
-		$query = $this->db->get();
-
-		if($query->num_rows() > 0){
-			return $query->result_array();
-		}
-	}
-
-	public function proses_login_admin($username, $password){
-		
-		$this->db->select('*');
-		$this->db->from('petugas');
-		$this->db->where('username', $username);
-		$this->db->where('password', MD5($password));
-
-		$query = $this->db->get();
-
-		if($query->num_rows() > 0){
-			return $query->result_array();
-		}
-	}
-
-
 	public function transaksi($id_pelanggan){
 
 		$this->db->where('id_pelanggan', $id_pelanggan);
@@ -49,4 +19,27 @@ class M_Login extends CI_Model {
         $query = $this->db->get();
         return $query->result();
     }
+
+	public function getUserByEmailAndPassword($email, $password) //ada
+    {
+        // Query untuk mengambil data pengguna berdasarkan username dan password
+        $query = $this->db->get_where('pelanggan', array('email' => $email, 'password' => $password));
+
+        if ($query->num_rows() > 0) {
+            return $query->row_array();
+        } else {
+            return false;
+        }
+    }
+
+	public function proses_login_admin($username, $password){ //ada
+		
+        $query = $this->db->get_where('petugas', array('username' => $username, 'password' => $password));
+
+        if ($query->num_rows() > 0) {
+            return $query->row_array();
+        } else {
+            return false;
+        }
+	}
 }

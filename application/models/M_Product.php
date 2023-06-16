@@ -17,10 +17,14 @@ class M_Product extends CI_Model {
 
 	//add new product
 	public function add_product(){
-		
-		$nama_produk = $_POST['nama_produk'];
-		$jenis_service = $_POST['jenis_service'];
-		$harga_produk = $_POST['harga_produk'];
+
+		$raw = $this->input->raw_input_stream;
+		$dataraw = json_decode($raw, true);
+
+		$nama_produk = $dataraw['nama_produk'];
+		$jenis_service = $dataraw['jenis_service'];
+		$harga_produk = $dataraw['harga_produk'];
+		$this->reset_auto_increment();
 
 		return $this->db->query("INSERT INTO produk (nama_produk, jenis_service ,harga_produk) VALUES ('$nama_produk', '$jenis_service', '$harga_produk')");
 
@@ -28,8 +32,12 @@ class M_Product extends CI_Model {
 
 	//delete product
 	public function delete_product($id_produk){
+		$this->reset_auto_increment();
+
+		$this->db->where('id_produk', $id_produk);
+        $this->db->delete('produk');
 		
-		return $this->db->query("DELETE FROM produk WHERE id_produk = '$id_produk'");
+		return $this->db->affected_rows() > 0;
 	}
 
 
@@ -42,13 +50,12 @@ class M_Product extends CI_Model {
     }
 
 	//update product
-	public function update_product($id_produk){
-		$nama_produk = $_POST['nama_produk'];
-		$jenis_service = $_POST['jenis_service'];
-		$harga_produk = $_POST['harga_produk'];
-
-		return $this->db->query("UPDATE produk SET nama_produk = '$nama_produk', jenis_service = '$jenis_service', harga_produk = '$harga_produk' WHERE id_produk = '$id_produk'");
+	public function update_product($id_produk, $nama_produk, $jenis_service, $harga_produk)
+	{
+		$query = $this->db->query("UPDATE produk SET nama_produk = ?, jenis_service = ?, harga_produk = ? WHERE id_produk = ?", array($nama_produk, $jenis_service, $harga_produk, $id_produk));
+		return $query;
 	}
+	
 
 
 }

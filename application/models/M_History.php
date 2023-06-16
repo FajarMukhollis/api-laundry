@@ -27,21 +27,21 @@ class M_History extends CI_Model
                 'label' => 'Total Harga',
                 'rules' => 'required'
             ],
-            [
-                'field' => 'status_bayar',
-                'label' => 'Status Bayar',
-                'rules' => 'required'
-            ],
+            // [
+            //     'field' => 'status_bayar',
+            //     'label' => 'Status Bayar',
+            //     'rules' => 'required'
+            // ],
             // [
             //     'field' => 'status_barang',
             //     'label' => 'Status Barang',
             //     'rules' => 'required'
             // ],
-            [
-                'field' => 'tgl_order',
-                'label' => 'Tanggal Order',
-                'rules' => 'required'
-            ],
+            // [
+            //     'field' => 'tgl_order',
+            //     'label' => 'Tanggal Order',
+            //     'rules' => 'required'
+            // ],
             // [
             //     'field' => 'tgl_selesai',
             //     'label' => 'Tanggal Selesai',
@@ -82,11 +82,9 @@ class M_History extends CI_Model
         return $query->result();
     }
 
-    public function get_transaksi()
+    public function get_transaksi()//ada
     {
 
-        // $this->db->where('id_pelanggan', $id_pelanggan);
-        // return $this->db->get('transaksi')->result();
 
         $this->db->select('transaksi.*, pelanggan.nama_pelanggan, produk.nama_produk');
         $this->db->from('transaksi');
@@ -98,22 +96,22 @@ class M_History extends CI_Model
         return $query->result();
     }
 
-    public function tambah_transaksi($idPelanggan, $data)
+    public function tambah_transaksi($idPelanggan, $data)//ada
     {
         // Tambahkan data transaksi ke dalam tabel transaksi
         $this->db->insert('transaksi', [
             'id_pelanggan' => $idPelanggan,
-            // 'id_petugas' => $data['id_petugas'],
+            'id_petugas' => 1,
             'id_produk' => $data['id_produk'],
             'berat' => $data['berat'],
             'total_harga' => $data['total_harga'],
-            'status_bayar' => $data['status_bayar'],
+            // 'status_bayar' => $data['status_bayar'],
             // 'status_barang' => $data['status_barang'],
-            'tgl_order' => $data['tgl_order'],
+            'tgl_order' => date('Y-m-d'),
             // 'tgl_selesai' => $data['tgl_selesai'],
         ]);
     }
-    public function update_transaksi($idPelanggan, $data)
+    public function update_transaksi($idPelanggan, $data)//ada
     {
         // Tambahkan data transaksi ke dalam tabel transaksi
         $this->db->where('id_transaksi', $data['id_transaksi']);
@@ -130,7 +128,7 @@ class M_History extends CI_Model
         ]);
     }
 
-    public function getTransaksiByPelanggan($id_pelanggan)
+    public function getTransaksiByPelanggan($id_pelanggan)//ada
     {
         $this->db->select('transaksi.*, produk.nama_produk');
         $this->db->from('transaksi');
@@ -146,12 +144,6 @@ class M_History extends CI_Model
 
         $this->db->where('id_pelanggan', $id_pelanggan);
         return $this->db->get('pelanggan')->result();
-
-        // $this->db->select('id_pelanggan');
-        // $this->db->from('transaksi');
-        // $this->db->where('id_pelanggan', $this->session->userdata('id_pelanggan'));
-        // $query = $this->db->get();
-        // return $query->result();
 
     }
 }

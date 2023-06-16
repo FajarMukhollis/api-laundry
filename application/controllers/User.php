@@ -14,54 +14,79 @@ class User extends RestController
 		$this->load->model('M_Register');
 		$this->load->model('M_History');
 		$this->load->helper('jwt');
+		$this->load->library('form_validation');
 	}
-
 
 	public function login_post()
 	{
 		$jwt = new JWT();
+		$raw = $this->input->raw_input_stream;
+		$data = json_decode($raw, true);
 
-		$email = $this->input->post('email');
-		$password = $this->input->post('password');
+		// Ambil data dari POST request
+		$email = $data['email'];
+		$password = $data['password'];
 
-		$cek = $this->M_Login->proses_login_user($email, $password);
-		if ($cek) {
+		// Validasi input
+		if (empty($email) || empty($password)) {
+			$this->response([
+				'status' => false,
+				'message' => 'email and password are required'
+			], RestController::HTTP_BAD_REQUEST);
+		}
+
+		$user = $this->M_Login->getUserByEmailAndPassword($email, md5($password));
+		if ($user) {
+			// Jika pengguna ditemukan, tampilkan data pengguna
 			$this->response([
 				'status' => true,
 				'message' => 'Login berhasil',
-				'token' => $jwt->encode($cek, jwtsecretkey),
-				'data' => $cek
+				'token' => $jwt->encode($user, jwtsecretkey),
+				'data' => $user
 			], restController::HTTP_OK);
-
-			$this->session->set_userdata('id_pelanggan', $id_pelanggan);
 		} else {
+			// Jika pengguna tidak ditemukan
 			$this->response([
 				'status' => false,
-				'message' => 'Login gagal'
+				'message' => 'Login gagal, Password atau Email salah'
 			], restController::HTTP_NOT_FOUND);
 		}
 	}
 
+
 	public function register_post()
 	{
+		$raw = $this->input->raw_input_stream;
+		$data = json_decode($raw, true);
+		$nama_pelanggan = $data['nama_pelanggan'];
+		$notelp = $data['no_telp'];
+		$alamat = $data['alamat'];
+		$email = $data['email'];
+		$password = $data['password'];
+
 		if ($this->M_Register->cek_email($this->post('email'))->num_rows() == 1) {
 			$this->response([
-				'status' => 'gagal',
+				'status' => FALSE,
 				'message' => 'Email sudah terdaftar, gunakan Email lain',
 			], restController::HTTP_BAD_REQUEST);
 		} else {
-			$proses = $this->M_Register->proses_register();
-			if ($proses) {
-				$this->response([
-					'status' => 'sukses',
-					'message' => 'Register berhasil',
-				], restController::HTTP_OK);
-			} else {
-				$this->response([
-					'status' => 'gagal',
-					'message' => 'Register gagal'
-				], restController::HTTP_FAILED);
-			}
+
+			$encrypted_password = md5($password);
+
+			$register = [
+				'nama_pelanggan' => $nama_pelanggan,
+				'no_telp' => $notelp,
+				'alamat' => $alamat,
+				'email' => $email,
+				md5('password') => $encrypted_password //bisa encrypt disini
+			];
+			$this->db->insert('pelanggan', $register);
+
+			$this->response([
+				'status' => TRUE,
+				'message' => 'Registrasi berhasil.',
+				'data' => $register
+			], RestController::HTTP_OK);
 		}
 	}
 
@@ -132,95 +157,49 @@ class User extends RestController
 			], RestController::HTTP_UNAUTHORIZED);
 		}
 	}
-	// public function transaksi_put()
-	// {
-	// 	$authorizationHeader = $this->input->get_request_header('Authorization');
-	// 	try {
-	// 		$this->load->library('form_validation');
-	// 		$token = explode(' ', $authorizationHeader)[1];
-	// 		// Lakukan logika yang sesuai dengan token bearer
-	// 		$user = JWT::decode($token, jwtsecretkey)[0];
-	// 		// Mengakses nilai "id_pelanggan"
-	// 		$idPelanggan = $user->id_pelanggan;
-	// 		// Validasi Input
-	// 		$rules = $this->M_History->rules();
-	// 		$this->form_validation->set_data($this->put());
-	// 		$this->form_validation->set_rules($rules);
-
-
-	// 		if ($this->form_validation->run($this->input->method()) == FALSE) {
-	// 			$errors = strip_tags(validation_errors());
-	// 			$errors = str_replace('\n', '', $errors);
-	// 			$errorArray = explode('.', $errors);
-	// 			$errorArray = array_map('trim', $errorArray);
-	// 			$errorArray = array_filter($errorArray);
-
-
-	// 			$this->response([
-	// 				'status' => false,
-	// 				'errors' => $errorArray,
-	// 			], RestController::HTTP_BAD_REQUEST);
-	// 		} else {
-	// 			$data = $this->put();
-	// 			// Insert
-	// 			$this->M_History->update_transaksi($idPelanggan, $data);
-	// 			$this->response([
-	// 				'status' => TRUE,
-	// 				'data' => $data
-	// 			], RestController::HTTP_OK);
-	// 		}
-	// 	} catch (Exception $e) {
-	// 		$this->response([
-	// 			'status' => 'gagal',
-	// 			'message' => 'Unauthorized'
-	// 		], RestController::HTTP_UNAUTHORIZED);
-	// 	}
-	// }
-
-	// public function history_get()
-	// {
-	// 	$id = $this->M_History->get_id_pelanggan($this->get('id_pelanggan'));
-
-	// 	$data = $this->M_History->get_history($id[0]->id_pelanggan);
-	// 	if ($data) {
-	// 		$this->response([
-	// 			'status' => false,
-	// 			'message' => 'Data tidak ditemukan'
-	// 		], RestController::HTTP_NOT_FOUND);
-	// 	} else {
-	// 		$this->response([
-	// 			'status' => true,
-	// 			'message' => 'Data ditemukan',
-	// 			'data' => $data
-	// 		], RestController::HTTP_OK);
-	// 	}
-	// }
-
-
-	public function historybyid_get($id_pelanggan)
+	public function transaksi_put()
 	{
-		$data = $this->M_History->get_history($id_pelanggan);
+		$authorizationHeader = $this->input->get_request_header('Authorization');
+		try {
+			$this->load->library('form_validation');
+			$token = explode(' ', $authorizationHeader)[1];
+			// Lakukan logika yang sesuai dengan token bearer
+			$user = JWT::decode($token, jwtsecretkey)[0];
+			// Mengakses nilai "id_pelanggan"
+			$idPelanggan = $user->id_pelanggan;
+			// Validasi Input
+			$rules = $this->M_History->rules();
+			$this->form_validation->set_data($this->put());
+			$this->form_validation->set_rules($rules);
 
-		if ($data == null) {
+
+			if ($this->form_validation->run($this->input->method()) == FALSE) {
+				$errors = strip_tags(validation_errors());
+				$errors = str_replace('\n', '', $errors);
+				$errorArray = explode('.', $errors);
+				$errorArray = array_map('trim', $errorArray);
+				$errorArray = array_filter($errorArray);
+
+
+				$this->response([
+					'status' => false,
+					'errors' => $errorArray,
+				], RestController::HTTP_BAD_REQUEST);
+			} else {
+				$data = $this->put();
+				// Insert
+				$this->M_History->update_transaksi($idPelanggan, $data);
+				$this->response([
+					'status' => TRUE,
+					'data' => $data
+				], RestController::HTTP_OK);
+			}
+		} catch (Exception $e) {
 			$this->response([
-				'status' => false,
-				'message' => 'Data tidak ditemukan'
-			], RestController::HTTP_NOT_FOUND);
-		} else {
-			$this->response([
-				'status' => true,
-				'message' => 'Data ditemukan',
-				'data' => $data
-			], RestController::HTTP_OK);
+				'status' => 'gagal',
+				'message' => 'Unauthorized'
+			], RestController::HTTP_UNAUTHORIZED);
 		}
 	}
 
-	public function history_get()
-	{
-		// Dapatkan data transaksi dari model
-		$transaksi = $this->M_History->get_transaksi();
-
-		// Tampilkan data transaksi dalam format JSON
-		$this->output->set_content_type('application/json')->set_output(json_encode($transaksi));
-	}
 }
