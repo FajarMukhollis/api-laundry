@@ -18,9 +18,19 @@ class M_History extends CI_Model
 				'rules' => 'required|numeric'
 			],
 			[
+				'field' => 'service',
+				'label' => 'service',
+				'rules' => 'required'
+			],
+			[
 				'field' => 'berat',
 				'label' => 'Berat',
 				'rules' => 'required|numeric'
+			],
+			[
+				'field' => 'alamat_pelanggan',
+				'label' => 'alamat_pelanggan',
+				'rules' => 'required'
 			],
 			[
 				'field' => 'total_harga',
@@ -82,61 +92,86 @@ class M_History extends CI_Model
 		return $query->result();
 	}
 
-	public function get_transaksi() //ada
+	public function tambah_transaksi($idPelanggan, $data)
 	{
+		// Tentukan status bayar berdasarkan keberadaan bukti bayar
+		if (!isset($data['bukti_bayar']) || $data['bukti_bayar'] === null) {
+			$statusBayar = 'Belum Lunas';
+		} else {
+			$statusBayar = 'Lunas';
+		}
 
-
-		$this->db->select('transaksi.*, pelanggan.nama_pelanggan, produk.nama_produk');
-		$this->db->from('transaksi');
-		$this->db->join('pelanggan', 'pelanggan.id_pelanggan = transaksi.id_pelanggan');
-		$this->db->join('produk', 'produk.id_produk = transaksi.id_produk');
-		$query = $this->db->get();
-
-		// Mengembalikan hasil query
-		return $query->result();
-	}
-
-	public function tambah_transaksi($idPelanggan, $data) //ada
-	{
 		// Tambahkan data transaksi ke dalam tabel transaksi
 		$this->db->insert('transaksi', [
 			'id_pelanggan' => $idPelanggan,
 			'id_petugas' => 1,
 			'id_produk' => $data['id_produk'],
+			'service' => $data['service'],
 			'berat' => $data['berat'],
+			'alamat_pelanggan' => $data['alamat_pelanggan'],
 			'total_harga' => $data['total_harga'],
-			'status_bayar' => 'BELUM LUNAS',
-			'status_barang' => 'BELUM DI PROSES',
+			'status_bayar' => $statusBayar,
 			'tgl_order' => date('Y-m-d'),
+			'komplen' => 'Tidak Ada Komplen',
 			// 'tgl_selesai' => $data['tgl_selesai'],
 		]);
 	}
-	public function update_transaksi($idPelanggan, $data) //ada
+
+	public function check_transaction($id_pelanggan, $id_transaksi)
 	{
-		// Tambahkan data transaksi ke dalam tabel transaksi
-		$this->db->where('id_transaksi', $data['id_transaksi']);
-		$this->db->update('transaksi', [
-			'id_pelanggan' => $idPelanggan,
-			'id_petugas' => $data['id_petugas'],
-			'id_produk' => $data['id_produk'],
-			'berat' => $data['berat'],
-			'total_harga' => $data['total_harga'],
-			'status_bayar' => $data['status_bayar'],
-			'status_barang' => $data['status_barang'],
-			'tgl_order' => $data['tgl_order'],
-			'tgl_selesai' => $data['tgl_selesai'],
-		]);
+		$this->db->where('id_pelanggan', $id_pelanggan);
+		$this->db->where('id_transaksi', $id_transaksi);
+		$query = $this->db->get('transaksi');
+
+		return $query->num_rows() > 0;
 	}
 
-	public function getTransaksiByPelanggan($id_pelanggan) //ada
+	public function post_complaint($id_pelanggan, $id_transaksi, $komplen)
+{
+		$this->db->set('komplen', $komplen);
+		$this->db->where('id_pelanggan', $id_pelanggan);
+		$this->db->where('id_transaksi', $id_transaksi);
+		$this->db->update('transaksi');
+
+		// Mengembalikan status update (berhasil/gagal)
+		return $this->db->affected_rows() > 0;
+	}
+
+	public function getTransaksiByPelanggan($id_pelanggan)
 	{
 		$this->db->select('transaksi.*, produk.nama_produk');
 		$this->db->from('transaksi');
 		$this->db->join('produk', 'produk.id_produk = transaksi.id_produk');
 		// $this->db->join('petugas', 'petugas.id_petugas = transaksi.id_petugas');
 		$this->db->where('transaksi.id_pelanggan', $id_pelanggan);
+		$this->db->order_by('transaksi.id_transaksi', 'desc'); // Urutkan berdasarkan id_produk secara descending
 		$query = $this->db->get();
 		return $query->result();
+	}
+	
+
+	public function detail_transaction($id_pelanggan, $id_transaksi)
+	{
+		$this->db->select('transaksi.*, produk.nama_produk');
+		$this->db->from('transaksi');
+		$this->db->join('produk', 'produk.id_produk = transaksi.id_produk');
+		// $this->db->join('petugas', 'petugas.id_petugas = transaksi.id_petugas');
+		$this->db->where('transaksi.id_pelanggan', $id_pelanggan);
+		$this->db->where('transaksi.id_transaksi', $id_transaksi);
+
+		$query = $this->db->get();
+		return $query->row();
+	}
+
+
+	public function postConfirmPayment($id_transaksi, $bukti_bayar)
+	{
+		$this->db->where('id_transaksi', $id_transaksi);
+		$this->db->update('transaksi', array(
+			'bukti_bayar' => $bukti_bayar,
+			'status_barang' => 'Menunggu Konfirmasi'
+		));
+		$this->db->affected_rows();
 	}
 
 	public function get_id_pelanggan($id_pelanggan)

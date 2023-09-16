@@ -53,18 +53,36 @@ $route['default_controller'] = 'welcome';
 $route['404_override'] = '';
 $route['translate_uri_dashes'] = FALSE;
 
-// Pelanggan
-$route['login'] = 'user/login';
-$route['transaksi'] = 'user/transaksi';
-$route['history'] = 'user/transaksi';
+// Users
+$route['login'] = 'Users/user/login';
+$route['register'] = 'Users/user/register';
+$route['transaksi'] = 'Users/user/transaksi';
+$route['history'] = 'Users/user/transaksi';
+$route['complaint'] = 'Users/user/complaint';
+$route['detail_history/(:num)'] = 'Users/user/detail_transaksi/$1';
 // $route['transaksi/(:num)'] = 'user/transaksi/$1';
 
 
 //admin
-$route['adminlogin'] = 'admin/login';
+$route['adminlogin'] = 'Admin/admin/login';
+$route['delete_history'] = 'Admin/admin/history';
+$route['get_history'] = 'Admin/admin/history';
+$route['edit_history'] = 'Admin/admin/history';
+$route['detail_transaksi/(:num)'] = 'Admin/admin/detail_transaksi/$1';
+
+//transaction
+$route['get_transaction'] = 'transaction/transaction';
+
 
 //product
-$route['get_product'] = 'product/product';
-$route['edit_product'] = 'product/product';
-$route['delete_product'] = 'product/product';
-$route['add_product'] = 'product/product';
+$route['get_product'] = 'Admin/product/product';
+$route['edit_product'] = 'Admin/product/product';
+$route['delete_product'] = 'Admin/product/product';
+$route['add_product'] = 'Admin/product/product';
+
+//recap
+$route['get_oneWeeks'] = 'Admin/admin/history_byWeek';
+$route['get_oneMonths'] = 'Admin/admin/history_bymonth';
+
+//confirm payment
+$route['confirm_payment'] = 'Users/User/confirm_payment';

@@ -9,7 +9,7 @@ class Product extends RestController
 	public function __construct()
 	{
 		parent::__construct();
-		$this->load->model('M_Product');
+		$this->load->model('M_Admin/M_Product');
 	}
 
 	public function product_get()
@@ -35,9 +35,12 @@ class Product extends RestController
 	{
 
 		$data = array(
+			'kategori' => $this->post('kategori'),
 			'nama_produk' => $this->post('nama_produk'),
 			'jenis_service' => $this->post('jenis_service'),
+			'durasi' => $this->post('durasi'),
 			'harga_produk' => $this->post('harga_produk'),
+			'satuan' => $this->post('satuan')
 		);
 
 		$proses = $this->M_Product->add_product($data);
@@ -92,22 +95,34 @@ class Product extends RestController
 	public function product_put()
 	{
 		$id_produk = $this->put('id_produk');
+		$kategori = $this->put('kategori');
 		$nama_produk = $this->put('nama_produk');
 		$jenis_service = $this->put('jenis_service');
+		$durasi = $this->put('durasi');
 		$harga_produk = $this->put('harga_produk');
-	
-		$check_data = $this->M_Product->update_product($id_produk, $nama_produk, $jenis_service, $harga_produk);
-		if ($check_data) {
-			$this->response([
-				'status' => true,
-				'message' => 'Data berhasil diupdate'
-			], RestController::HTTP_OK);
+		$satuan = $this->put('satuan');
+
+		$check_id = $this->M_Product->cek_idProduct($id_produk);
+
+		if ($check_id) {
+
+			$check_data = $this->M_Product->update_product($id_produk, $kategori, $nama_produk, $jenis_service, $durasi, $harga_produk, $satuan);
+			if ($check_data) {
+				$this->response([
+					'status' => true,
+					'message' => 'Data berhasil diubah'
+				], RestController::HTTP_OK);
+			} else {
+				$this->response([
+					'status' => false,
+					'message' => 'Data gagal diubah'
+				], RestController::HTTP_BAD_REQUEST);
+			}
 		} else {
 			$this->response([
 				'status' => false,
-				'message' => 'Data tidak ditemukan'
+				'message' => 'id produk tidak ditemukan'
 			], RestController::HTTP_NOT_FOUND);
 		}
 	}
-	
 }
