@@ -52,6 +52,7 @@ class M_Product extends CI_Model
 	//get product by id
 	public function get_produk_by_id($id_produk)
 	{
+		$this->reset_auto_increment();
 
 		$this->db->where('id_produk', $id_produk);
 		return $this->db->get('produk')->result();

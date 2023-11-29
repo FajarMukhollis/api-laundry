@@ -12,6 +12,7 @@ class User extends RestController
 		$this->load->model('M_Users/M_Login');
 		$this->load->model('M_Users/M_Register');
 		$this->load->model('M_Users/M_History');
+		$this->load->model('M_Users/M_Profile');
 		$this->load->helper('jwt');
 		$this->load->library('form_validation');
 	}
@@ -31,25 +32,25 @@ class User extends RestController
 			$this->response(
 				[
 					'status' => false,
-					'message' => 'email and password are required',
+					'message' => 'email dan password dibutuhkan',
 				],
 				RestController::HTTP_BAD_REQUEST
 			);
 		}
 
-		$cek = $this->M_Login->proses_login_user($email, md5($password));
-		if ($cek) {
+		$user = $this->M_Login->proses_login_user($email);
+		if ($user && password_verify($password, $user['password'])) {
 			$this->response(
 				[
 					'status' => true,
 					'message' => 'Login berhasil',
-					'token' => $jwt->encode($cek, jwtsecretkey),
-					'data' => $cek,
+					'token' => $jwt->encode($user, jwtsecretkey),
+					'data' => $user,
 				],
 				restController::HTTP_OK
 			);
 
-			$this->session->set_userdata('id_pelanggan', $id_pelanggan);
+			$this->session->set_userdata('id_pelanggan', $user['id_pelanggan']);
 		} else {
 			$this->response(
 				[
@@ -81,7 +82,7 @@ class User extends RestController
 				restController::HTTP_BAD_REQUEST
 			);
 		} else {
-			$encrypted_password = md5($password);
+			$encrypted_password = password_hash($password, PASSWORD_BCRYPT);
 
 			$register = [
 				'nama_pelanggan' => $nama_pelanggan,
@@ -357,5 +358,35 @@ class User extends RestController
 		$this->output
 			->set_content_type('application/json')
 			->set_output(json_encode($response));
+	}
+
+	public function change_password_post()
+	{
+		//cek id_pelanggan
+		$id_pelanggan = $this->post('id_pelanggan');
+		$old_password = $this->post('old_password');
+		$new_password = $this->post('new_password');
+		$user = $this->M_Profile->get_pelanggan_by_id($id_pelanggan);
+		if ($user == null) {
+			$this->response([
+				'status' => false,
+				'message' => 'User tidak ditemukan',
+			], RestController::HTTP_NOT_FOUND);
+		} else {
+			if (password_verify($old_password, $user->password)) {
+				$new_password_hash = password_hash($new_password, PASSWORD_BCRYPT);
+				$this->M_Profile->change_password($id_pelanggan, $new_password_hash);
+				$this->response([
+					'status' => true,
+					'message' => 'Password berhasil diubah',
+					'pwd'	=> $new_password_hash
+				], RestController::HTTP_OK);
+			} else {
+				$this->response([
+					'status' => false,
+					'message' => 'Password gagal diubah, password lama tidak sesuai',
+				], RestController::HTTP_BAD_REQUEST);
+			}
+		}
 	}
 }

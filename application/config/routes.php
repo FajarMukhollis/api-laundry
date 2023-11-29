@@ -54,21 +54,24 @@ $route['404_override'] = '';
 $route['translate_uri_dashes'] = FALSE;
 
 // Users
-$route['login'] = 'Users/user/login';
-$route['register'] = 'Users/user/register';
-$route['transaksi'] = 'Users/user/transaksi';
-$route['history'] = 'Users/user/transaksi';
-$route['complaint'] = 'Users/user/complaint';
-$route['detail_history/(:num)'] = 'Users/user/detail_transaksi/$1';
+$route['user/login'] = 'Users/user/login';
+$route['user/register'] = 'Users/user/register';
+$route['user/transaksi'] = 'Users/user/transaksi';
+$route['user/history'] = 'Users/user/transaksi';
+$route['user/complaint'] = 'Users/user/complaint';
+$route['user/detail_history/(:num)'] = 'Users/user/detail_transaksi/$1';
 // $route['transaksi/(:num)'] = 'user/transaksi/$1';
+$route['user/change_password'] = 'Users/user/change_password';
 
+//confirm payment
+$route['user/confirm_payment'] = 'Users/User/confirm_payment';
 
 //admin
-$route['adminlogin'] = 'Admin/admin/login';
-$route['delete_history'] = 'Admin/admin/history';
-$route['get_history'] = 'Admin/admin/history';
-$route['edit_history'] = 'Admin/admin/history';
-$route['detail_transaksi/(:num)'] = 'Admin/admin/detail_transaksi/$1';
+$route['admin/login'] = 'Admin/admin/login';
+$route['admin/delete_history'] = 'Admin/admin/history';
+$route['admin/get_history'] = 'Admin/admin/history';
+$route['admin/edit_history'] = 'Admin/admin/history';
+$route['admin/detail_transaksi/(:num)'] = 'Admin/admin/detail_transaksi/$1';
 
 //transaction
 $route['get_transaction'] = 'transaction/transaction';
@@ -76,13 +79,10 @@ $route['get_transaction'] = 'transaction/transaction';
 
 //product
 $route['get_product'] = 'Admin/product/product';
-$route['edit_product'] = 'Admin/product/product';
-$route['delete_product'] = 'Admin/product/product';
-$route['add_product'] = 'Admin/product/product';
+$route['admin/edit_product'] = 'Admin/product/product';
+$route['admin/delete_product'] = 'Admin/product/product';
+$route['admin/add_product'] = 'Admin/product/product';
 
 //recap
-$route['get_oneWeeks'] = 'Admin/admin/history_byWeek';
-$route['get_oneMonths'] = 'Admin/admin/history_bymonth';
-
-//confirm payment
-$route['confirm_payment'] = 'Users/User/confirm_payment';
+$route['admin/get_oneWeeks'] = 'Admin/admin/history_byWeek';
+$route['admin/get_oneMonths'] = 'Admin/admin/history_bymonth';

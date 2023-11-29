@@ -33,10 +33,10 @@ class M_Login extends CI_Model
 		}
 	}
 	
-	public function proses_login_user($email, $password)
+	public function proses_login_user($email)
 	{
 
-		$query = $this->db->get_where('pelanggan', array('email' => $email, 'password' => $password));
+		$query = $this->db->get_where('pelanggan', array('email' => $email));
 
 		if ($query->num_rows() > 0) {
 			return $query->row_array();
