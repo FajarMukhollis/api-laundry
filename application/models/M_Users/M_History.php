@@ -107,21 +107,34 @@ class M_History extends CI_Model
 			$statusBayar = 'Lunas';
 		}
 
+		$statusBarang = 'Menunggu Konfirmasi';
+		$order_number = $this->generate_random_order_number();
+
 		// Tambahkan data transaksi ke dalam tabel transaksi
 		$this->db->insert('transaksi', [
 			'id_pelanggan' => $idPelanggan,
 			'id_petugas' => 1,
 			'id_kategori' => $data['id_kategori'],
 			'id_produk' => $data['id_produk'],
+			'no_pesanan' => $order_number,
 			'service' => $data['service'],
 			'berat' => $data['berat'],
 			'alamat_pelanggan' => $data['alamat_pelanggan'],
 			'total_harga' => $data['total_harga'],
 			'status_bayar' => $statusBayar,
+			'status_barang' => $statusBarang,
 			'tgl_order' => date('Y-m-d'),
 			'komplen' => 'Tidak Ada Komplen',
 			// 'tgl_selesai' => $data['tgl_selesai'],
 		]);
+	}
+
+	private function generate_random_order_number() {
+		$prefix = 'PL';
+		$random_number = mt_rand(0, 999999); // Ganti sesuai kebutuhan
+		$order_number = $prefix . str_pad($random_number, 6, '0', STR_PAD_LEFT);
+	
+		return $order_number;
 	}
 
 	public function check_transaction($id_pelanggan, $id_transaksi)
