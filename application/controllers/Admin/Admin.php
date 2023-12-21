@@ -29,12 +29,12 @@ class Admin extends RestController
 		if (empty($username) || empty($password)) {
 			$this->response([
 				'status' => false,
-				'message' => 'email and password are required'
+				'message' => 'username and password dibutuhkan'
 			], RestController::HTTP_BAD_REQUEST);
 		}
 
-		$admin = $this->M_Login->proses_login_admin($username, md5($password));
-		if ($admin) {
+		$admin = $this->M_Login->proses_login_admin($username);
+		if ($admin && password_verify($password, $admin['password'])) {
 			$this->response([
 				'status' => true,
 				'message' => 'Login Berhasil',
@@ -159,21 +159,22 @@ class Admin extends RestController
 		}
 	}
 
-	public function detail_transaksi_get($id_transaksi) {
+	public function detail_transaksi_get($id_transaksi)
+	{
 
-        $transaksi = $this->M_Transaksi->getDetailTransaksi($id_transaksi);
+		$transaksi = $this->M_Transaksi->getDetailTransaksi($id_transaksi);
 
-        if ($transaksi != null) {
-            $this->response([
+		if ($transaksi != null) {
+			$this->response([
 				'status' => true,
 				'message' => 'Detail Transaksi Ditemukan',
 				'data' => $transaksi
 			], restController::HTTP_OK);
-        } else {
-            $this->response([
+		} else {
+			$this->response([
 				'status' => false,
 				'message' => 'Detail Transaksi Tidak Ditemukan'
 			], restController::HTTP_NOT_FOUND);
-        }
-    }
+		}
+	}
 }

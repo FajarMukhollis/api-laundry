@@ -236,7 +236,7 @@ class User extends RestController
 						'message' => 'Transaksi berhasil dilakukan',
 						'data' => $data,
 					],
-					RestController::HTTP_CREATED
+					RestController::HTTP_OK
 				);
 			}
 		} catch (Exception $e) {
@@ -362,6 +362,19 @@ class User extends RestController
 
 	public function change_password_post()
 	{
+
+		$authorizationHeader = $this->input->get_request_header('Authorization');
+		try {
+			$token = explode(' ', $authorizationHeader)[1];
+			$user = JWT::decode($token, jwtsecretkey);
+		} catch (Exception $e) {
+			$this->response([
+				'status' => 'gagal',
+				'message' => 'Unauthorized',
+			], RestController::HTTP_UNAUTHORIZED);
+			return;
+		}
+
 		//cek id_pelanggan
 		$id_pelanggan = $this->post('id_pelanggan');
 		$old_password = $this->post('old_password');
@@ -379,7 +392,7 @@ class User extends RestController
 				$this->response([
 					'status' => true,
 					'message' => 'Password berhasil diubah',
-					'pwd'	=> $new_password_hash
+					'password'	=> $new_password_hash
 				], RestController::HTTP_OK);
 			} else {
 				$this->response([
@@ -387,6 +400,52 @@ class User extends RestController
 					'message' => 'Password gagal diubah, password lama tidak sesuai',
 				], RestController::HTTP_BAD_REQUEST);
 			}
+		}
+	}
+
+	public function profile_get()
+	{
+		// Verifikasi otentikasi pelanggan di sini
+		// Misalnya, Anda dapat menggunakan library JWT untuk verifikasi token
+		$authorizationHeader = $this->input->get_request_header(
+			'Authorization'
+		);
+		try {
+			$token = explode(' ', $authorizationHeader)[1];
+			// Lakukan logika yang sesuai dengan token bearer
+			$user = JWT::decode($token, jwtsecretkey);
+			// Mengakses nilai "id_pelanggan"
+			$idPelanggan = $user->id_pelanggan;
+			// Memanggil model untuk mendapatkan data transaksi
+			$transaksi = $this->M_Profile->get_profile(
+				$idPelanggan
+			);
+			if ($transaksi) {
+				$this->response(
+					[
+						'status' => true,
+						'message' => 'Data ditemukan',
+						'data' => $transaksi,
+					],
+					RestController::HTTP_OK
+				);
+			} else {
+				$this->response(
+					[
+						'status' => false,
+						'message' => 'Data tidak ditemukan',
+					],
+					RestController::HTTP_NOT_FOUND
+				);
+			}
+		} catch (Exception $e) {
+			$this->response(
+				[
+					'status' => 'gagal',
+					'message' => 'Unauthorized',
+				],
+				RestController::HTTP_UNAUTHORIZED
+			);
 		}
 	}
 }

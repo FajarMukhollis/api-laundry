@@ -60,6 +60,11 @@ class M_History extends CI_Model
 		];
 	}
 
+	public function reset_auto_increment_transaksi()
+	{
+		return $this->db->query("ALTER TABLE transaksi AUTO_INCREMENT = 1");
+	}
+
 	public function history_byid($id_pelanggan)
 	{
 
@@ -94,6 +99,7 @@ class M_History extends CI_Model
 
 	public function tambah_transaksi($idPelanggan, $data)
 	{
+		$this->reset_auto_increment_transaksi();
 		// Tentukan status bayar berdasarkan keberadaan bukti bayar
 		if (!isset($data['bukti_bayar']) || $data['bukti_bayar'] === null) {
 			$statusBayar = 'Belum Lunas';
@@ -105,6 +111,7 @@ class M_History extends CI_Model
 		$this->db->insert('transaksi', [
 			'id_pelanggan' => $idPelanggan,
 			'id_petugas' => 1,
+			'id_kategori' => $data['id_kategori'],
 			'id_produk' => $data['id_produk'],
 			'service' => $data['service'],
 			'berat' => $data['berat'],
@@ -127,7 +134,7 @@ class M_History extends CI_Model
 	}
 
 	public function post_complaint($id_pelanggan, $id_transaksi, $komplen)
-{
+	{
 		$this->db->set('komplen', $komplen);
 		$this->db->where('id_pelanggan', $id_pelanggan);
 		$this->db->where('id_transaksi', $id_transaksi);
@@ -139,28 +146,45 @@ class M_History extends CI_Model
 
 	public function getTransaksiByPelanggan($id_pelanggan)
 	{
-		$this->db->select('transaksi.*, produk.nama_produk');
+		$this->db->select('transaksi.*, produk.nama_produk, kategori_produk.jenis_kategori');
 		$this->db->from('transaksi');
 		$this->db->join('produk', 'produk.id_produk = transaksi.id_produk');
-		// $this->db->join('petugas', 'petugas.id_petugas = transaksi.id_petugas');
+		$this->db->join('kategori_produk', 'kategori_produk.id_kategori = produk.id_kategori');
+		// Tambahkan join lain jika diperlukan
+
 		$this->db->where('transaksi.id_pelanggan', $id_pelanggan);
-		$this->db->order_by('transaksi.id_transaksi', 'desc'); // Urutkan berdasarkan id_produk secara descending
+		$this->db->order_by('transaksi.id_transaksi', 'desc'); // Urutkan berdasarkan id_transaksi secara descending
+
 		$query = $this->db->get();
-		return $query->result();
+		$results = $query->result();
+
+		// Loop melalui hasil dan atur jenis_kategori berdasarkan id_kategori
+		foreach ($results as $result) {
+			$result->jenis_kategori = $this->getJenisKategoriById($result->id_kategori);
+		}
+
+		return $results;
 	}
-	
 
 	public function detail_transaction($id_pelanggan, $id_transaksi)
 	{
-		$this->db->select('transaksi.*, produk.nama_produk');
+		$this->db->select('transaksi.*, produk.nama_produk, kategori_produk.jenis_kategori');
 		$this->db->from('transaksi');
 		$this->db->join('produk', 'produk.id_produk = transaksi.id_produk');
-		// $this->db->join('petugas', 'petugas.id_petugas = transaksi.id_petugas');
+		$this->db->join('kategori_produk', 'kategori_produk.id_kategori = produk.id_kategori');
+		// Add more joins if needed
+
 		$this->db->where('transaksi.id_pelanggan', $id_pelanggan);
 		$this->db->where('transaksi.id_transaksi', $id_transaksi);
 
 		$query = $this->db->get();
-		return $query->row();
+		$result = $query->row();
+
+		if ($result) {
+			$result->jenis_kategori = $this->getJenisKategoriById($result->id_kategori);
+		}
+
+		return $result;
 	}
 
 
@@ -179,5 +203,16 @@ class M_History extends CI_Model
 
 		$this->db->where('id_pelanggan', $id_pelanggan);
 		return $this->db->get('pelanggan')->result();
+	}
+
+	private function getJenisKategoriById($id_kategori)
+	{
+		$this->db->select('jenis_kategori');
+		$this->db->from('kategori_produk');
+		$this->db->where('id_kategori', $id_kategori);
+		$query = $this->db->get();
+		$result = $query->row();
+
+		return $result ? $result->jenis_kategori : NULL;
 	}
 }

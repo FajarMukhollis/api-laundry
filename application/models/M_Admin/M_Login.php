@@ -21,10 +21,10 @@ class M_Login extends CI_Model
 		return $query->result();
 	}
 
-	public function proses_login_admin($username, $password)
+	public function proses_login_admin($username)
 	{ //ada
 
-		$query = $this->db->get_where('petugas', array('username' => $username, 'password' => $password));
+		$query = $this->db->get_where('petugas', array('username' => $username));
 
 		if ($query->num_rows() > 0) {
 			return $query->row_array();

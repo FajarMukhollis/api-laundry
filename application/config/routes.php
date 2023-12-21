@@ -62,6 +62,7 @@ $route['user/complaint'] = 'Users/user/complaint';
 $route['user/detail_history/(:num)'] = 'Users/user/detail_transaksi/$1';
 // $route['transaksi/(:num)'] = 'user/transaksi/$1';
 $route['user/change_password'] = 'Users/user/change_password';
+$route['user/profile'] = 'Users/user/profile';
 
 //confirm payment
 $route['user/confirm_payment'] = 'Users/User/confirm_payment';
@@ -79,9 +80,29 @@ $route['get_transaction'] = 'transaction/transaction';
 
 //product
 $route['get_product'] = 'Admin/product/product';
+$route['get_product_byIdCategory/(:num)'] = 'Admin/product/product_by_category/$1';
 $route['admin/edit_product'] = 'Admin/product/product';
 $route['admin/delete_product'] = 'Admin/product/product';
 $route['admin/add_product'] = 'Admin/product/product';
+
+
+//rules asosisi
+$route['get_rules_asosiasi'] = 'Admin/rules/asosiasi';
+$route['admin/edit_rules_asosiasi'] = 'Admin/rules/asosiasi';
+$route['admin/delete_rules_asosiasi'] = 'Admin/rules/asosiasi';
+$route['admin/add_rules_asosiasi'] = 'Admin/rules/asosiasi';
+
+//rules komplain
+$route['get_rules_komplain'] = 'Admin/rules/rules_komplain';
+$route['admin/edit_rules_komplain'] = 'Admin/rules/rules_komplain';
+$route['admin/delete_rules_komplain'] = 'Admin/rules/rules_komplain';
+$route['admin/add_rules_komplain'] = 'Admin/rules/rules_komplain';
+
+//category
+$route['get_category'] = 'Admin/product/category';
+$route['admin/edit_category'] = 'Admin/product/category';
+$route['admin/delete_category'] = 'Admin/product/category';
+$route['admin/add_category'] = 'Admin/product/category';
 
 //recap
 $route['admin/get_oneWeeks'] = 'Admin/admin/history_byWeek';

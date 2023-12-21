@@ -9,18 +9,25 @@ class M_Transaksi extends CI_Model
 		return $this->db->get('transaksi')->result();
 	}
 
-	public function get_transaksi() //ada
+	public function get_transaksi()
 	{
-
-		$this->db->select('transaksi.*, pelanggan.nama_pelanggan, produk.nama_produk');
+		$this->db->select('transaksi.*, pelanggan.nama_pelanggan, produk.nama_produk, kategori_produk.jenis_kategori');
 		$this->db->from('transaksi');
 		$this->db->join('pelanggan', 'pelanggan.id_pelanggan = transaksi.id_pelanggan');
 		$this->db->join('produk', 'produk.id_produk = transaksi.id_produk');
+		$this->db->join('kategori_produk', 'kategori_produk.id_kategori = produk.id_kategori');
+		// Tambahkan join lain jika diperlukan
+
 		$this->db->order_by('transaksi.id_transaksi', 'desc');
 		$query = $this->db->get();
+		$results = $query->result();
 
-		// Mengembalikan hasil query
-		return $query->result();
+		// Loop melalui hasil dan atur jenis_kategori berdasarkan id_kategori
+		foreach ($results as $result) {
+			$result->jenis_kategori = $this->getJenisKategoriById($result->id_kategori);
+		}
+
+		return $results;
 	}
 
 	public function delete_transaksi($id_produk)
@@ -48,13 +55,25 @@ class M_Transaksi extends CI_Model
 
 	public function getDetailTransaksi($id_transaksi)
 	{
-		$this->db->select('transaksi.*, pelanggan.nama_pelanggan, pelanggan.no_telp, produk.nama_produk');
+		$this->db->select('transaksi.*, pelanggan.nama_pelanggan, pelanggan.no_telp, produk.nama_produk, kategori_produk.jenis_kategori');
 		$this->db->from('transaksi');
 		$this->db->join('pelanggan', 'pelanggan.id_pelanggan = transaksi.id_pelanggan');
 		$this->db->join('produk', 'produk.id_produk = transaksi.id_produk');
+		$this->db->join('kategori_produk', 'kategori_produk.id_kategori = produk.id_kategori');
+		// Tambahkan join lain jika diperlukan
+
 		$this->db->where('transaksi.id_transaksi', $id_transaksi);
-		return $this->db->get()->row();
+		$query = $this->db->get();
+		$result = $query->row();
+
+		// Jika jenis_kategori yang sesuai tidak ditemukan, atur jenis_kategori menjadi NULL
+		if ($result) {
+			$result->jenis_kategori = $this->getJenisKategoriById($result->id_kategori);
+		}
+
+		return $result;
 	}
+
 
 
 	public function get_transaksi_by_one_week()
@@ -95,5 +114,16 @@ class M_Transaksi extends CI_Model
 	public function reset_auto_increment()
 	{
 		return $this->db->query("ALTER TABLE transaksi AUTO_INCREMENT = 1");
+	}
+
+	private function getJenisKategoriById($id_kategori)
+	{
+		$this->db->select('jenis_kategori');
+		$this->db->from('kategori_produk');
+		$this->db->where('id_kategori', $id_kategori);
+		$query = $this->db->get();
+		$result = $query->row();
+
+		return $result ? $result->jenis_kategori : NULL;
 	}
 }

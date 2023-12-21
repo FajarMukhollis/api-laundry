@@ -14,4 +14,10 @@ class M_Profile extends CI_Model
 		$this->db->where('id_pelanggan', $id_pelanggan);
 		$this->db->update('pelanggan', array('password' => $new_password_hash));
 	}
+
+	public function get_profile($id_pelanggan)
+	{
+		$this->db->where('id_pelanggan', $id_pelanggan);
+		return $this->db->get('pelanggan')->row();
+	}
 }
